@@ -34,7 +34,7 @@ const Conversation = ({ title }: ConversationProps) => {
 
   const systemPrompt: Partial<Message> = {
     role: MessageRole.System,
-    content: "You are helpful assistant",
+    content: "You are a conversational AI assistant designed to understand and respond to queries in Chinese and English. Your task is to provide accurate, helpful, and contextually appropriate responses to users’ questions using the same language as the question. You can synthesize information, offer support, and complete various tasks.",
   };
 
 
@@ -59,6 +59,7 @@ const Conversation = ({ title }: ConversationProps) => {
       userPrompt,
       messages,
       model: "Qwen/Qwen2-7B",
+
     })
     setPrompt("")
   }
@@ -121,7 +122,7 @@ const Conversation = ({ title }: ConversationProps) => {
 
             {selectedConversation?.Messages.map((message) => {
               return (<ConversationMessage key={`_ai`} date={message.time * 1000} human={message.role == MessageRole.User} message={message.content} />)
-              })
+            })
             }
 
             {onGoingResult && (

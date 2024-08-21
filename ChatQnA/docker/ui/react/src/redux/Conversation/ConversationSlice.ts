@@ -172,6 +172,9 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
 
   //   let conversation: Conversation;
   let result = "";
+  let ansFlag: boolean = true;
+  let assFlag: boolean = false;
+  let attempt = 1;
   try {
     fetchEventSource(CHAT_QNA_URL, {
       method: "POST",
@@ -192,7 +195,17 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
         }
       },
       onmessage(msg) {
-        if (msg?.data != "[DONE]") {
+        if (msg?.data == "assistant" || msg?.data == "Assistant") {
+          assFlag = true;
+          ansFlag = true;
+        }
+        if (msg?.data == "user" || msg?.data == "User" || msg?.data == "###") {
+          ansFlag = false;
+          if (assFlag == true) {
+            attempt -= 1
+          }
+        }
+        if (msg?.data != "[DONE]" && msg?.data != "<|endoftext|>" && ansFlag && attempt > 0) {
           try {
             /*const match = msg.data.match(/b'([^']*)'/);
               if (match && match[1] != "</s>") {
@@ -201,8 +214,10 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
               store.dispatch(setOnGoingResult(result));
             }
             */
-            result += msg.data;
-            store.dispatch(setOnGoingResult(result));
+            if (msg?.data != ":" && msg?.data != "assistant" && msg?.data != "Assistant") {
+              result += msg.data;
+              store.dispatch(setOnGoingResult(result));
+            }
           } catch (e) {
             console.log("something wrong in msg", e);
             throw e;
