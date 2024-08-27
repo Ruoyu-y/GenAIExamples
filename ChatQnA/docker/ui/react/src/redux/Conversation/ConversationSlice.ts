@@ -165,17 +165,19 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
     role: userPrompt.role,
     content: userPrompt.content,
   };
+  console.log(messages);
   const body = {
-    messages: [...messages, userPromptWithoutTime],
+    messages: userPromptWithoutTime.content,
     model,
+    max_tokens: 128,
   };
 
   //   let conversation: Conversation;
   let result = "";
-  const decoder = new TextDecoder('utf-8');
-  //let ansFlag: boolean = true;
-  //let assFlag: boolean = false;
-  //let attempt = 1;
+  let mark = "";
+  let attempt = 0;
+  let signalFlag: boolean = true;
+  let ansFlag: boolean = true;
   try {
     fetchEventSource(CHAT_QNA_URL, {
       method: "POST",
@@ -196,38 +198,32 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
         }
       },
       onmessage(msg) {
-        /*if (msg?.data == "assistant" || msg?.data == "Assistant") {
-          assFlag = true;
-          ansFlag = true;
+        if (msg?.data == "<") {
+          signalFlag = false;
         }
-        if (msg?.data == "user" || msg?.data == "User" || msg?.data == "###") {
-          ansFlag = false;
-          if (assFlag == true || msg?.data == "###") {
-            attempt -= 1
-          }
-        }
-        if (msg?.data != "[DONE]" && msg?.data != "<|endoftext|>" && ansFlag && attempt > 0) {
-        */
-        if (msg?.data != "[DONE]" && msg?.data != "<|endoftext|>") {
-          try {
-              const match = msg.data.match(/b'([^']*)'/);
-              if (match && match[1] != "</s>") {
-              const extractedText = match[1];
-              const hexMatch = extractedText.match(/\\x[0-9a-fA-F]{2}/g);
-              if (hexMatch) {
-                  const textArr = new Uint8Array(extractedText.match(/\\x[0-9a-fA-F]{2}/g)?.map(h => parseInt(h.replace('\\x', ''), 16)) || []);
-                  result += decoder.decode(textArr);
-              } else {
-                  result += extractedText;
-              }
+
+        if (!signalFlag) {
+          if (attempt < 6) {
+            mark += msg?.data;
+            attempt += 1;
+          } else {
+            if (mark == "<|im_start|>") {
+              ansFlag = false;
+            } else {
+              attempt = 0;
+              signalFlag = true;
+              result += mark;
               store.dispatch(setOnGoingResult(result));
             }
-            /*
-            if (msg?.data != ":" && msg?.data != "assistant" && msg?.data != "Assistant") {
+          }
+        }
+
+        if (msg?.data != "[DONE]" && ansFlag) {
+          try {
+            if (signalFlag) {
               result += msg.data;
               store.dispatch(setOnGoingResult(result));
             }
-            */
           } catch (e) {
             console.log("something wrong in msg", e);
             throw e;

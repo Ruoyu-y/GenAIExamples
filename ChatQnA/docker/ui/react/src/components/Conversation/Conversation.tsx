@@ -34,7 +34,7 @@ const Conversation = ({ title }: ConversationProps) => {
 
   const systemPrompt: Partial<Message> = {
     role: MessageRole.System,
-    content: "You are a conversational AI assistant designed to understand and respond to queries in Chinese and English. Your task is to provide accurate, helpful, and contextually appropriate responses to users’ questions using the same language as the question. You can synthesize information, offer support, and complete various tasks.",
+    content: "You are a conversational AI assistant designed to understand and respond to queries in Chinese and English. Your task is to provide accurate, helpful, and contextually appropriate responses to users’ questions. You need to use the same language to answer user's question and you should give answers according to the reference documents if exist. You can synthesize information, offer support, and complete various tasks. No more question or information should be provided to the user.",
   };
 
 
@@ -59,7 +59,6 @@ const Conversation = ({ title }: ConversationProps) => {
       userPrompt,
       messages,
       model: "Qwen/Qwen2-72B-Chat",
-
     })
     setPrompt("")
   }
