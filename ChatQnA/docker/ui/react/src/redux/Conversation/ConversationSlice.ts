@@ -137,6 +137,7 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
 
   //   let conversation: Conversation;
   let result = "";
+  const decoder = new TextDecoder('utf-8');
   try {
     fetchEventSource(CHAT_QNA_URL, {
       method: "POST",
@@ -160,11 +161,21 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
         if (msg?.data != "[DONE]") {
           try {
             const match = msg.data.match(/b'([^']*)'/);
+            // check if model returns byte string
             if (match && match[1] != "</s>") {
               const extractedText = match[1];
-              result += extractedText;
-              store.dispatch(setOnGoingResult(result));
+              // check if extractedText is hex (Case that msg is Chinese)
+              const hexMatch = extractedText.match(/\\x[0-9a-fA-F]{2}/g);
+              if (hexMatch) {
+                const textArr = new Uint8Array(extractedText.match(/\\x[0-9a-fA-F]{2}/g)?.map(h => parseInt(h.replace('\\x', ''), 16)) || []);
+                result += decoder.decode(textArr);
+              } else {
+                result += extractedText;
+              }
+            } else {
+              result += msg?.data
             }
+            store.dispatch(setOnGoingResult(result));
           } catch (e) {
             console.log("something wrong in msg", e);
             throw e;
