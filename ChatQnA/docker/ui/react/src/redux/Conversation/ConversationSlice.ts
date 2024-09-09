@@ -130,8 +130,9 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
     role: userPrompt.role,
     content: userPrompt.content,
   };
+  console.log(messages)
   const body = {
-    messages: [...messages, userPromptWithoutTime],
+    text: userPromptWithoutTime.content,
     model,
   };
 
@@ -160,7 +161,7 @@ export const doConversation = (conversationRequest: ConversationRequest) => {
         if (msg?.data != "[DONE]") {
           try {
             const match = msg.data.match(/b'([^']*)'/);
-            if (match && match[1] != "</s>") {
+            if (match && match[1] != "</s>" && match[1] != '\n') {
               const extractedText = match[1];
 
               // Check for the presence of \x hexadecimal
