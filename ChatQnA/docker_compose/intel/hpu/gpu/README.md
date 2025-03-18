@@ -302,18 +302,6 @@ curl -X POST "http://${host_ip}:6007/v1/dataprep/delete" \
 
 If you want to launch the UI using Nginx, open this URL: `http://${host_ip}:${NGINX_PORT}` in your browser to access the frontend.
 
-## 🚀 Launch the Conversational UI (Optional)
-
-To access the Conversational UI (react based) frontend, open the following URL in your browser: http://{host_ip}:5174. By default, the UI runs on port 80 internally. If you prefer to use a different host port to access the frontend, you can modify the port mapping in the `compose.yaml` file as shown below:
-
-```yaml
-  chatqna-xeon-conversation-ui-server:
-    image: opea/chatqna-conversation-ui:latest
-    ...
-    ports:
-      - "80:80"
-```
-
 Here is an example of running ChatQnA with Conversational UI (React):
 
 ![project-screenshot](../../../../assets/img/conversation_ui_response.png)
